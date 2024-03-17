@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Assets.Scripts.Gameplay;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -11,9 +12,8 @@ namespace Assets.Scripts
    {
       
    [SerializeField] private GameObject player;
-   [SerializeField] private GameObject initialPlayerPosition;
    [SerializeField] private int id;
-
+   [SerializeField] private Vector3 initialPlayerPosition;
    private PlayerController _playerController;
    public delegate void OnLevelLoadedAction(int id);
    public static event OnLevelLoadedAction OnLevelLoaded;
@@ -25,8 +25,12 @@ namespace Assets.Scripts
     
    public void StartLevel()
    {
-      if (_playerController == null) _playerController = player.GetComponent<PlayerController>();
-      _playerController.InitPlayer(initialPlayerPosition.transform.position);
+      if (_playerController == null)
+      {
+         _playerController = player.GetComponent<PlayerController>();
+         return;
+      }
+      if (_playerController != null) _playerController.InitPlayer(initialPlayerPosition);
       OnLevelLoaded?.Invoke(id);
    }
    

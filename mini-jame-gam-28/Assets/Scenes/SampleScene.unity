@@ -10526,19 +10526,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sounds:
-  - Name: hitwall
+  - name: hitWall
     Clip: {fileID: 8300000, guid: eebf222763ba7564e844979d44b98483, type: 3}
-    Pitch: 1
+    pitch: 0
     Volume: 0.4
     audioSource: {fileID: 0}
-  - Name: grow
+  - name: Grow
     Clip: {fileID: 8300000, guid: 72be3ee66f7344d43b2d345dac0ad8c1, type: 3}
-    Pitch: 1
+    pitch: 0
     Volume: 0.4
     audioSource: {fileID: 0}
-  - Name: pickUpSun
+  - name: pickUpSun
     Clip: {fileID: 8300000, guid: 5f90b05ee9a65a746b53cb2687a7ef3e, type: 3}
-    Pitch: 1
+    pitch: 0
     Volume: 0.4
     audioSource: {fileID: 0}
 --- !u!1 &1902599701

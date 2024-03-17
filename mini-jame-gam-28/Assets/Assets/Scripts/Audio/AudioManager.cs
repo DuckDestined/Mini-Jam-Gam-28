@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Assets.Scripts.Gameplay;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -11,9 +12,9 @@ namespace Assets.Scripts.Audio
         [Serializable]
         public class Sound
         {
-            public string Name;
+            public string name;
             public AudioClip Clip;
-            public float Pitch;
+            public float pitch;
             public float Volume;
             public AudioSource audioSource;
         }
@@ -26,7 +27,13 @@ namespace Assets.Scripts.Audio
             TileManager.OnCollectedSun += TileManagerOnOnCollectedSun;
             PlayerController.OnPlayerMove += OnPlayerMove;
             TileManager.OnInvalidMove += TileManagerOnOnInvalidMove;
+            PlayerController.OnPlayerReset += OnPlayerReset;
             InitSounds();
+        }
+
+        private void OnPlayerReset()
+        {
+            PlaySound("Fail");
         }
 
         private void TileManagerOnOnInvalidMove()
@@ -34,10 +41,18 @@ namespace Assets.Scripts.Audio
             PlaySound("hitWall");
         }
 
-        private void OnPlayerMove(int remainingmoves)
+        private void OnPlayerMove(int remainingmoves,Vector2 _)
         {
-            PlaySound("grow");
-            sounds[1].Pitch += 0.2f;
+            PlaySound("Grow");
+            if (sounds[1].pitch < 1.9f)
+            {
+                sounds[1].pitch += 0.1f;
+            }
+            else
+            {
+                sounds[1].pitch = 1;
+            }
+            
         }
 
         private void TileManagerOnOnCollectedSun()
@@ -51,7 +66,7 @@ namespace Assets.Scripts.Audio
             {
                 sound.audioSource = gameObject.AddComponent<AudioSource>();
                 sound.audioSource.clip = sound.Clip;
-                sound.audioSource.pitch = sound.Pitch;
+                sound.audioSource.pitch = sound.pitch;
                 sound.audioSource.volume = sound.Volume;
             }
         }
@@ -65,14 +80,18 @@ namespace Assets.Scripts.Audio
         {
             foreach (var sound in sounds)
             {
-                sound.audioSource.pitch = sound.Pitch;
+                sound.audioSource.pitch = sound.pitch;
                 sound.audioSource.volume = sound.Volume;
             }
         }
-    
-        public void PlaySound(string soundName)
+
+        private void PlaySound(string soundName)
         {
-            (from sound in sounds where sound.Name == soundName select sound).ToList()[0].audioSource.Play();
+            var matchingSounds = (from sound in sounds where sound.name == soundName select sound).ToList();
+            if (matchingSounds.Count > 0) 
+            {
+                matchingSounds[0].audioSource.Play();
+            }
         }
     
     }
