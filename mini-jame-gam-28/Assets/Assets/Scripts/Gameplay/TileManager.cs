@@ -7,6 +7,8 @@ using Assets.Scripts.Gameplay;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Serialization;
+using static Assets.Scripts.Gameplay.Extensions;
+using static Assets.Scripts.Gameplay.Extensions.Direction;
 
 public class TileManager : MonoBehaviour
 {
@@ -53,10 +55,15 @@ public class TileManager : MonoBehaviour
     }
     
 
-    public bool IsTileAvailable(Vector3 currentLocation,Vector2 currentDirection, Vector2 movementDirection, Vector3 tileLocation)
+    public bool IsTileAvailable(Vector3 currentLocation, Direction currentDirection, Direction movementDirection, Vector3 tileLocation)
     {
         var tileObject = _currentTiles[Mathf.RoundToInt(tileLocation.x) + 5, Mathf.RoundToInt(tileLocation.y) + 4];
-        if (tileObject == null) return true;
+        if (tileObject == null)
+        {
+            var spawnedStick = SpawnStick(currentLocation, currentDirection, movementDirection);
+            _currentTiles[Mathf.RoundToInt(currentLocation.x + 5 ), Mathf.RoundToInt(currentLocation.y + 4)] = spawnedStick;
+            return true;
+        }
         switch (tileObject.tag)
         {
             case "Obstacle":
@@ -68,123 +75,111 @@ public class TileManager : MonoBehaviour
             {
                 Destroy(tileObject);
                 OnCollectedSun?.Invoke();
-                LoadNextLevel();
-                return true;
+                Start();
+                return false;
             }
             default:
             {
-                var spawnedStick = Instantiate(stick);
-                var spriteRenderer = stick.GetComponent<SpriteRenderer>();
-                spawnedStick.transform.position = currentLocation;
-                
+                var spawnedStick = SpawnStick(currentLocation, currentDirection, movementDirection);
+                _currentTiles[Mathf.RoundToInt(currentLocation.x + 5 ), Mathf.RoundToInt(currentLocation.y + 4)] = spawnedStick;
                 return true;
             }
         }
     }
 
 
-    public void SpawnStick(Vector3 location, Vector2 currentDirection, Vector2 movementDirection)
+    private GameObject SpawnStick(Vector3 location, Direction currentDirection, Direction movementDirection)
     {
         var spawnedStick = Instantiate(stick);
         spawnedStick.transform.position = location;
         var spriteRenderer = spawnedStick.GetComponent<SpriteRenderer>();
-        if (currentDirection == Up)
+        switch (currentDirection)
         {
-            if (movementDirection == Up)
-            {
-                spriteRenderer.sprite = vertical;
-            }
+            case Direction.Up:
+            { 
+                switch (movementDirection)
+                {
+                    case Direction.Up:
+                        spriteRenderer.sprite = vertical;
+                        break;
+                    case Direction.Down:
+                        return null;
+                    case Direction.Left:
+                        spriteRenderer.sprite = up_left;
+                        break;
+                    case Direction.Right:
+                        spriteRenderer.sprite = up_right;
+                        break;
+                }
 
-            if (movementDirection == Down)
-            {
-                return;
+                break;
             }
-
-            if (movementDirection == Left)
+            case Direction.Down:
             {
-                spriteRenderer.sprite = up_left;
-            }
+                switch (movementDirection)
+                {
+                    case Direction.Down:
+                        spriteRenderer.sprite = vertical;
+                        break;
+                    case Direction.Left:
+                        spriteRenderer.sprite = down_right;
+                        break;
+                    case Direction.Right:
+                        spriteRenderer.sprite = down_left;
+                        break;
+                }
 
-            if (movementDirection == Right)
+                break;
+            }
+            case Direction.Left:
             {
-                spriteRenderer.sprite = up_right;
+                switch (movementDirection)
+                {
+                    case Direction.Up:
+                        spriteRenderer.sprite = left_right;
+                        break;
+                    case Direction.Down:
+                        spriteRenderer.sprite = left_left;
+                        break;
+                    case Direction.Left:
+                        spriteRenderer.sprite = horizontal;
+                        break;
+                    case Direction.Right:
+                        return null;
+                }
 
+                break;
             }
+            case Direction.Right:
+            {
+                switch (movementDirection)
+                {
+                    case Direction.Up:
+                    {
+                        spriteRenderer.sprite = right_left;
+                        break;
+                    }
+                    case Direction.Down:
+                    {
+                        spriteRenderer.sprite = right_right;
+                        break;
+                    }
+                    case Direction.Left:
+                        return null;
+                    case Direction.Right:
+                    {
+                        spriteRenderer.sprite = horizontal;
+                        break;
+                    }
+                }
+
+                break;
+            }
+            default:
+                throw new ArgumentOutOfRangeException(nameof(currentDirection), currentDirection, null);
         }
 
-        if (currentDirection == Down)
-        {
-            if (movementDirection == Up)
-            {
-                return;
-            }
-
-            if (movementDirection == Down)
-            {
-                spriteRenderer.sprite = vertical;
-            }
-
-            if (movementDirection == Left)
-            {
-                spriteRenderer.sprite = down_left;
-
-            }
-
-            if (movementDirection == Right)
-            {
-                spriteRenderer.sprite = down_right;
-
-            }
-        }
-
-        if (currentDirection == Left)
-        {
-            if (movementDirection == Up)
-            {
-                spriteRenderer.sprite = left_right;
-            }
-
-            if (movementDirection == Down)
-            {
-                spriteRenderer.sprite = left_left;
-            }
-
-            if (movementDirection == Left)
-            {
-                spriteRenderer.sprite = horizontal;
-            }
-
-            if (movementDirection == Right)
-            {
-                return;
-            }
-        }
-
-        if (currentDirection == Right)
-        {
-            if (movementDirection == Up)
-            {
-                spriteRenderer.sprite = right_left;
-
-            }
-
-            if (movementDirection == Down)
-            {
-                spriteRenderer.sprite = right_right;
-
-            }
-
-            if (movementDirection == Left)
-            {
-                return;
-            }
-
-            if (movementDirection == Right)
-            {
-                spriteRenderer.sprite = vertical;
-            }
-        }
-
+        return spawnedStick;
     }
 
     private void ReadLevel(Level level)

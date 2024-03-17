@@ -9,13 +9,13 @@ using UnityEngine;
 public class LoadPlayerMoves : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
-    private void Start()
+    private void Awake()
     {
         _text = GetComponent<TMP_Text>();
         PlayerController.OnPlayerMove += OnPlayerMove;
     }
 
-    private void OnPlayerMove(int remainingMmoves, Vector2 _)
+    private void OnPlayerMove(int remainingMmoves)
     {
         _text.SetText("X"+ remainingMmoves);
     }

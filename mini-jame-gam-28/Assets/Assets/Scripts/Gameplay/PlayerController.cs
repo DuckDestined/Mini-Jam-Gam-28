@@ -12,14 +12,14 @@ namespace Assets.Scripts.Gameplay
         [Serializable]
         private class MoveData
         {
-            public MoveData(Transform playerTransform,Vector2 direction)
+            public MoveData(Transform playerTransform,Extensions.Direction direction)
             {
                 Position = playerTransform.position;
                 Direction = direction;
             }
             
             public Vector3 Position;
-            public Vector2 Direction;
+            public Extensions.Direction Direction;
         }
         
         private PlayerInput _playerInput;
@@ -29,7 +29,7 @@ namespace Assets.Scripts.Gameplay
         
         
         
-        private bool _isResetting;
+        [SerializeField] private bool _isResetting;
         [SerializeField] private int elapsedTimeResettingInMilliseconds;
 
         [SerializeField] private SpriteRenderer spriteRenderer;
@@ -40,7 +40,7 @@ namespace Assets.Scripts.Gameplay
 
         private int _currentResetMove;
 
-        public delegate void PlayerMoveAction(int remainingMoves,Vector2 currentDirection);
+        public delegate void PlayerMoveAction(int remainingMoves);
         public static PlayerMoveAction OnPlayerMove;        
         
         public delegate void PlayerResetAction();
@@ -49,15 +49,21 @@ namespace Assets.Scripts.Gameplay
         [SerializeField] private List<MoveData> playerMoves;
         
         // Start is called before the first frame update
-        void Start()
+        void Awake()
         {
             _playerInput = new PlayerInput();
             _playerInput.Enable();
             _playerInput.Player.Move.performed += MoveOnPerformed;
             TileManager.OnCollectedSun += TileManagerOnonCollectedSun;
-            OnPlayerMove?.Invoke(_remainingMoves,new Vector2());
+            Level.OnLevelLoaded += LevelOnOnLevelLoaded;
+            OnPlayerMove?.Invoke(_remainingMoves);
             playerMoves = new List<MoveData>();
             _remainingMoves = 0;
+        }
+
+        private void LevelOnOnLevelLoaded(int _, Vector3 initialPlayerLocation)
+        {
+            InitPlayer(initialPlayerLocation);
         }
 
         private void Update()
@@ -92,15 +98,17 @@ namespace Assets.Scripts.Gameplay
         public void InitPlayer(Vector3 position)
         {
             _remainingMoves = 10; ;
-            var newMove = new MoveData(this.transform, new Vector2(0,0));
+            this.transform.position = position;
+            var newMove = new MoveData(this.transform, Extensions.Direction.Up);
             playerMoves.Add(newMove);
         }
         private void MoveOnPerformed(InputAction.CallbackContext obj)
         {
-            var direction = obj.ReadValue<Vector2>();
+            var input = obj.ReadValue<Vector2>();
+            var direction = Extensions.ToDirection(input);
             
             if (_remainingMoves > 0) {
-                Move(direction);
+                Move(input);
                 var newMove = new MoveData(this.transform,direction);
                 ChangeFacingDirection(direction);
                 playerMoves.Add(newMove);
@@ -111,37 +119,36 @@ namespace Assets.Scripts.Gameplay
                 ResetPlayer();
             }
             if (_remainingMoves == 0) ResetPlayer();
-            OnPlayerMove?.Invoke(_remainingMoves,currentDirection);
+            OnPlayerMove?.Invoke(_remainingMoves);
         }
 
-        private void ChangeFacingDirection(Vector2 direction)
+        private void ChangeFacingDirection(Extensions.Direction direction)
         {
-            switch (direction.x)
+            switch (direction)
             {
-                case > 0:
+               case Extensions.Direction.Right:
                     spriteRenderer.sprite = right;
-                    return;
-                case < 0:
+                    break;
+               case Extensions.Direction.Left:
                     spriteRenderer.sprite = left;
-                    return;            
-            }            
-            switch (direction.y)
-            {
-                case > 0:
+                    break;
+
+               case Extensions.Direction.Up:
                     spriteRenderer.sprite = up;
-                    return;                
-                case < 0:
+                    break;
+
+               case Extensions.Direction.Down:
                     spriteRenderer.sprite = down;
-                    return;            
+                    break;
             }
 
-            spriteRenderer.sprite = up;
+            currentDirection = direction;
         }
         
         public void ResetRemainingMoves()
         {
             _remainingMoves = 10;
-            OnPlayerMove?.Invoke(_remainingMoves,currentDirection);
+            OnPlayerMove?.Invoke(_remainingMoves);
         }
 
         public void ResetPlayer()
@@ -153,7 +160,8 @@ namespace Assets.Scripts.Gameplay
             _currentResetMove = playerMoves.Count-1;
             elapsedTimeResettingInMilliseconds = 0;
         }
-
+        
+        
     }
     
 

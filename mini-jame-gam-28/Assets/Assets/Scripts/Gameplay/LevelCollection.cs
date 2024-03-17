@@ -5,7 +5,7 @@ namespace Assets.Scripts.Gameplay
 {
   public class LevelCollection : MonoBehaviour
   {
-    private int _currentLevelIndex = -1;
+    [SerializeField] private int _currentLevelIndex = -1;
     [SerializeField] private List<GameObject> levels; 
   
   

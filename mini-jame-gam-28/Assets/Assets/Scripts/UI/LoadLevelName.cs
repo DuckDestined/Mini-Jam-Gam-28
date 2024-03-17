@@ -9,12 +9,12 @@ public class LoadLevelName : MonoBehaviour
 {
     [SerializeField] private TMP_Text text;
 
-    private void Start()
+    private void Awake()
     {
         Level.OnLevelLoaded += LevelOnLevelLoaded;
     }
 
-    private void LevelOnLevelLoaded(int id)
+    private void LevelOnLevelLoaded(int id,Vector3 _ )
     {
         text.SetText("Level " + id);
     }

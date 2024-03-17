@@ -8,7 +8,7 @@ public class LoadSuns : MonoBehaviour
 {
     [SerializeField] private TMP_Text _text;
     [SerializeField] private int _suns;
-    private void Start()
+    private void Awake()
     {
         _text = GetComponent<TMP_Text>();
         TileManager.OnCollectedSun += OnCollectedSun;

@@ -10,30 +10,16 @@ namespace Assets.Scripts
    public class Level : MonoBehaviour
    
    {
-      
-   [SerializeField] private GameObject player;
    [SerializeField] private int id;
    [SerializeField] private Vector3 initialPlayerPosition;
-   private PlayerController _playerController;
-   public delegate void OnLevelLoadedAction(int id);
+   public delegate void OnLevelLoadedAction(int id, Vector3 initialPlayerLocation);
    public static event OnLevelLoadedAction OnLevelLoaded;
-   private void Start()
-   {
-      _playerController = player.GetComponent<PlayerController>();
-      StartLevel();
-   }
-    
+
+   
    public void StartLevel()
    {
-      if (_playerController == null)
-      {
-         _playerController = player.GetComponent<PlayerController>();
-         return;
-      }
-      if (_playerController != null) _playerController.InitPlayer(initialPlayerPosition);
-      OnLevelLoaded?.Invoke(id);
+      OnLevelLoaded?.Invoke(id, initialPlayerPosition);
    }
-   
    
    public List<GameObject> LoadTiles()
    {

@@ -41,7 +41,7 @@ namespace Assets.Scripts.Audio
             PlaySound("hitWall");
         }
 
-        private void OnPlayerMove(int remainingmoves,Vector2 _)
+        private void OnPlayerMove(int remainingmoves)
         {
             PlaySound("Grow");
             if (sounds[1].pitch < 1.9f)
